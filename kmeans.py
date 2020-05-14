@@ -1,8 +1,7 @@
 import argparse
-import os
-import random
-import numpy as np
 import math
+import os
+import numpy as np
 
 
 def read_file(file_path):
@@ -35,8 +34,6 @@ Citing paper: http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf
 https://en.wikipedia.org/wiki/K-means%2B%2B
 Below is the algorithm to choose randomly initial centroids for k-means is taken from above paper
 """
-
-
 def get_random_centroids(dataset, k):
     centroids = []
     first_centroid_choice = np.random.choice(len(dataset))  # Select first centroid from uniform distribution
@@ -65,8 +62,34 @@ def get_random_centroids(dataset, k):
 
 
 def cluster(dataset, centroids, k, iterations=1000):
-    for t in range(1000):
-        pass
+    clusters = {}
+
+    for t in range(iterations):
+        for index, centroid in enumerate(centroids):
+            clusters[index] = []
+            centroid['label'] = index
+
+        for instance in dataset:
+            closest_centroid = min(centroids, key=lambda item: euclidean_distance(item['x'], instance['x']))
+            cluster_label = closest_centroid['label']
+            clusters[cluster_label].append(instance)
+
+        new_centroids = []
+        for cluster_label, members in clusters.items():
+            size = float(len(members))
+            new_centroid = np.zeros(members[0]['x'].shape[0])  # zero-initialize array of size of feature-dimension
+            for member in members:
+                new_centroid = new_centroid + member['x']
+
+            new_centroid = new_centroid / size
+            new_centroids.append({'x': new_centroid, 'label': cluster_label})
+
+        centroids = new_centroids
+
+    return clusters, centroids
+
+
+
 
 
 if __name__ == '__main__':
@@ -89,3 +112,5 @@ if __name__ == '__main__':
     print("Dataset read, size: {0}".format(str(len(dataset))))
 
     random_centroids = get_random_centroids(dataset, args.k)
+    cluster(dataset, random_centroids, args.k)
+
