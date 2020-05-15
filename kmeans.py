@@ -65,6 +65,9 @@ def cluster(dataset, centroids, k, iterations=1000):
     clusters = {}
 
     for t in range(iterations):
+        if t % 10 == 0:
+            print("Iterations completed: " + str(t))
+
         for index, centroid in enumerate(centroids):
             clusters[index] = []
             centroid['label'] = index
@@ -86,10 +89,17 @@ def cluster(dataset, centroids, k, iterations=1000):
 
         centroids = new_centroids
 
+
     return clusters, centroids
 
 
+def get_positive_diagnosis_percentages(clusters):
+    percentages = []
+    for cluster_label, members in clusters.items():
+        count = sum([1.0 if member['y'] == 1.0 else 0.0 for member in members])
+        percentages.append(count * 100.0 / len(members))
 
+    return percentages
 
 
 if __name__ == '__main__':
@@ -112,5 +122,8 @@ if __name__ == '__main__':
     print("Dataset read, size: {0}".format(str(len(dataset))))
 
     random_centroids = get_random_centroids(dataset, args.k)
-    cluster(dataset, random_centroids, args.k)
+    clusters, centroids = cluster(dataset, random_centroids, args.k, iterations=1000)
+    positive_percentages = get_positive_diagnosis_percentages(clusters)
 
+    print("Cluster sizes: " + ", ".join(str(len(members)) for members in clusters.values()))
+    print(str("Positive diagnosis percentages: " + ", ".join([str(p) for p in positive_percentages])))
