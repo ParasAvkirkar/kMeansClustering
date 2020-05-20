@@ -48,7 +48,7 @@ def get_random_centroids(dataset, k):
     for j in range(k - 1):
         probability = []
         for i in range(len(dataset)):
-            # Do not consider the previously seleected centroid for probability calculation
+            # Do not consider the previously selected centroid for probability calculation
             if i not in selected_centroids:
                 instance = dataset[i]
                 # Find out which one of the centroid is closest to instance 'x'
@@ -72,10 +72,9 @@ def is_converge(old_centroids, new_centroids):
 
     """
         The k-Means algorithm converges when there are no changes in cluster assignments
-        That is all the members remain their previous cluster
-        In such a case, the centroids of the cluster remain same and do not change
-        Hence, the newly computed centroids will be same as previous one
-        Here we check whether all the corresponding centroid vectors of the new and old centroids are same or not
+        That is all the members remain in the same cluster
+        Hence, the newly computed centroids of the cluster will be same as previous cluster
+        Here we check whether all the vectors of the new and old corresponding centroids are same or not
         If all the old and corresponding newly computed centroids matched then we return True
     """
     return all([np.isclose(old_centroids[i]['x'], new_centroids[i]['x']).all() for i, centroid in enumerate(old_centroids)])
@@ -87,7 +86,8 @@ def cluster(dataset, centroids, k, distance_metric, max_iterations=1000):
     t = 0
     new_centroids = None
     while not is_converge(centroids, new_centroids):
-        centroids = new_centroids if new_centroids is not None else centroids  # Use centroids computed in previous loop-pass
+        # Use centroids computed in previous loop-pass, for the first-loop use the initial centroids received as parameter
+        centroids = new_centroids if new_centroids is not None else centroids
 
         for index, centroid in enumerate(centroids):
             clusters[index] = []
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='kmeans')
     parser.add_argument('--dataset', type=str, help='Path to dataset')
-    parser.add_argument('--distance', type=str)
+    parser.add_argument('--distance', type=str, default='Euclidean')
     parser.add_argument('--k', type=int, help='Specify k parameter')
 
     args = parser.parse_args()
@@ -142,11 +142,8 @@ if __name__ == '__main__':
         parser.error('please specify --dataset with corresponding path to dataset')
 
     distance_metric = None
-    if args.distance is None or args.distance not in ['Manhattan', 'Euclidean']:
-        print("Invalid distance measure")
-        parser.error('please specify --distance with either Manhattan or Euclidean')
-    else:
-        distance_metric = euclidean_distance if args.distance == "Euclidean" else manhattan_distance
+    distance_metric = euclidean_distance if args.distance == "Euclidean" else manhattan_distance
+    print("Distance measure used: {0}".format(str(args.distance)))
 
     dataset = read_file(args.dataset)
     print("Dataset read, size: {0}".format(str(len(dataset))))
