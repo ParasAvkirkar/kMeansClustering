@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='kmeans')
     parser.add_argument('--dataset', type=str, help='Path to dataset')
-    parser.add_argument('--distance', type=str)
+    parser.add_argument('--distance', type=str, default='Euclidean')
     parser.add_argument('--k', type=int, help='Specify k parameter')
 
     args = parser.parse_args()
